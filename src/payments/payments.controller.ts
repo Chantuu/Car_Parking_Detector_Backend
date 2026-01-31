@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
 import { AddPaymentCardDTO } from './DTOs/add-payment-card.dto';
 import { PaymentsService } from './payments.service';
 import { CurrentUser } from 'src/helper/decorators/current-user.decorator';
@@ -21,5 +21,10 @@ export class PaymentsController {
     @CurrentUser() user: User,
   ) {
     return await this._paymentsService.addPaymentCard(addPaymentCardDto, user);
+  }
+
+  @Delete('paymentCard')
+  async deletePaymentCard(@CurrentUser() user: User) {
+    return await this._paymentsService.deletePaymentCard(user);
   }
 }
