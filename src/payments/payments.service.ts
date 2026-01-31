@@ -93,4 +93,34 @@ export class PaymentsService {
       throw new BadRequestException(paymentCardAlreadyExistsErrorMessage);
     }
   }
+
+  async deletePaymentCard(user: User) {
+    const paymentCard = await this._paymentCardRepository.findOne({
+      where: { user: { id: user.id } },
+      relations: { user: true },
+    });
+
+    if (paymentCard) {
+      const decryptedCardNumber = this._encryptionService.decrypt(
+        paymentCard.encryptedCardNumber,
+      );
+      const maskedCardNumber = this.maskCardNumber(decryptedCardNumber);
+
+      await this._paymentCardRepository.remove([paymentCard]);
+
+      return {
+        status: 'success',
+        data: {
+          id: paymentCard.id,
+          userId: paymentCard.user.id,
+          cardNumber: maskedCardNumber,
+          cardExpirationMonth: paymentCard.cardExpirationMonth,
+          cardExpirationYear: paymentCard.cardExpirationYear,
+          cardHolderName: paymentCard.cardHolderName,
+        },
+      };
+    } else {
+      throw new BadRequestException(paymentCardNotExistsErrorMessage);
+    }
+  }
 }
