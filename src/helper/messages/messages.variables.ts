@@ -13,5 +13,8 @@ export const userIdErrorMessage =
 export const invalidCardCredentialErrorMessage =
   'Given card details are invalid. Please give correct card credentials!';
 
-export const creditCardAlreadyExistsErrorMessage =
+export const paymentCardAlreadyExistsErrorMessage =
   'Current user already has credit card!';
+
+export const paymentCardNotExistsErrorMessage =
+  'Payment card for current user does not exist!';
