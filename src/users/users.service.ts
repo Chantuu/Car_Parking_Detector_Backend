@@ -21,8 +21,8 @@ export class UsersService {
 
   async create(registerUserDTO: RegisterUserDTO) {
     const newUser = this._userRepository.create({
+      fullName: registerUserDTO.fullName,
       email: registerUserDTO.email,
-      fullName: registerUserDTO.email,
       passwordHashed: await hashPassword(registerUserDTO.password),
     });
     return this._userRepository.save(newUser);
