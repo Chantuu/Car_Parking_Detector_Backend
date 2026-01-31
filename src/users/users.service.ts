@@ -22,7 +22,10 @@ export class UsersService {
    * @returns Promise containing user entity or null
    */
   findOne(userId: string): Promise<User | null> {
-    return this._userRepository.findOne({ where: { id: userId } });
+    return this._userRepository.findOne({
+      where: { id: userId },
+      relations: { paymentCard: true },
+    });
   }
 
   /**
@@ -32,7 +35,10 @@ export class UsersService {
    * @returns Promise containing user entity or null
    */
   findOneByEmail(userEmail: string): Promise<User | null> {
-    return this._userRepository.findOne({ where: { email: userEmail } });
+    return this._userRepository.findOne({
+      where: { email: userEmail },
+      relations: { paymentCard: true },
+    });
   }
 
   /**
