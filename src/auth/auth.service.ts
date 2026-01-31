@@ -31,10 +31,7 @@ export class AuthService {
       userExists &&
       (await comparePassword(loginUserDTO.password, userExists.passwordHashed))
     ) {
-      return {
-        success: true,
-        message: `Successfully signed in user ${userExists.fullName}`,
-      };
+      return userExists;
     } else {
       throw new BadRequestException(
         'User does not exist with that email or password.',

@@ -9,11 +9,19 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() registerUserDTO: RegisterUserDTO) {
-    return await this._authService.register(registerUserDTO);
+    const result = await this._authService.register(registerUserDTO);
+    return {
+      success: true,
+      message: `Successfully registered user ${result.fullName}`,
+    };
   }
 
   @Post('login')
   async login(@Body() loginUserDTO: LoginUserDTO) {
-    return await this._authService.login(loginUserDTO);
+    const result = await this._authService.login(loginUserDTO);
+    return {
+      success: true,
+      message: `Successfully signed in user ${result.fullName}`,
+    };
   }
 }
