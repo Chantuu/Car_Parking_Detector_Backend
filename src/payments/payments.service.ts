@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { AddPaymentCardDTO } from './DTOs/add-payment-card.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaymentCard } from './payment-card.entity';
@@ -9,7 +13,10 @@ import {
   paymentCardAlreadyExistsErrorMessage,
   invalidCardCredentialErrorMessage,
   paymentCardNotExistsErrorMessage,
+  insufficientMoneyErrorMessage,
 } from 'src/helper/messages/messages.variables';
+import { PayDTO } from './DTOs/pay.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class PaymentsService {
@@ -17,17 +24,22 @@ export class PaymentsService {
     @InjectRepository(PaymentCard)
     private _paymentCardRepository: Repository<PaymentCard>,
     private _encryptionService: EncryptionService,
+    private _usersService: UsersService,
   ) {}
 
   private maskCardNumber(unmaskedCardNumber) {
     return `${'*'.repeat(unmaskedCardNumber.length - 4)}${unmaskedCardNumber.slice(-4)}`;
   }
 
-  async getPaymentCard(user: User) {
-    const paymentCard = await this._paymentCardRepository.findOne({
+  private returnPaymentCardofCurrentUser(user: User) {
+    return this._paymentCardRepository.findOne({
       where: { user: { id: user.id } },
       relations: { user: true },
     });
+  }
+
+  async getPaymentCard(user: User) {
+    const paymentCard = await this.returnPaymentCardofCurrentUser(user);
 
     if (paymentCard) {
       const decryptedCardNumber = this._encryptionService.decrypt(
@@ -95,10 +107,7 @@ export class PaymentsService {
   }
 
   async deletePaymentCard(user: User) {
-    const paymentCard = await this._paymentCardRepository.findOne({
-      where: { user: { id: user.id } },
-      relations: { user: true },
-    });
+    const paymentCard = await this.returnPaymentCardofCurrentUser(user);
 
     if (paymentCard) {
       const decryptedCardNumber = this._encryptionService.decrypt(
@@ -119,6 +128,28 @@ export class PaymentsService {
           cardHolderName: paymentCard.cardHolderName,
         },
       };
+    } else {
+      throw new BadRequestException(paymentCardNotExistsErrorMessage);
+    }
+  }
+
+  //TODO: Implement Reservation logic
+  async pay(payDTO: PayDTO, user: User) {
+    const paymentCard = await this.returnPaymentCardofCurrentUser(user);
+
+    if (paymentCard && user.money >= payDTO.amount) {
+      user.money -= payDTO.amount;
+      await this._usersService.saveUpdatedUser(user);
+
+      return {
+        status: 'success',
+        data: {
+          amount: payDTO.amount,
+          paymentStatus: 'Completed',
+        },
+      };
+    } else if (paymentCard && user.money < payDTO.amount) {
+      throw new ConflictException(insufficientMoneyErrorMessage);
     } else {
       throw new BadRequestException(paymentCardNotExistsErrorMessage);
     }
