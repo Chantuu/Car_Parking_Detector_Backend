@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
+import { RegisterUserDTO } from 'src/auth/DTOs/register-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -13,8 +14,12 @@ export class UsersService {
     return this._userRepository.findOne({ where: { id: userId } });
   }
 
-  create(user: User) {
-    const newUser = this._userRepository.create(user);
+  create(registerUserDTO: RegisterUserDTO) {
+    const newUser = this._userRepository.create({
+      email: registerUserDTO.email,
+      fullName: registerUserDTO.email,
+      passwordHashed: registerUserDTO.password,
+    });
     return this._userRepository.save(newUser);
   }
 
