@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { RegisterUserDTO } from 'src/auth/DTOs/register-user.dto';
+import { hashPassword } from 'src/helper/functions/hash-password.function';
 
 @Injectable()
 export class UsersService {
@@ -18,11 +19,11 @@ export class UsersService {
     return this._userRepository.findOne({ where: { email: userEmail } });
   }
 
-  create(registerUserDTO: RegisterUserDTO) {
+  async create(registerUserDTO: RegisterUserDTO) {
     const newUser = this._userRepository.create({
       email: registerUserDTO.email,
       fullName: registerUserDTO.email,
-      passwordHashed: registerUserDTO.password,
+      passwordHashed: await hashPassword(registerUserDTO.password),
     });
     return this._userRepository.save(newUser);
   }
