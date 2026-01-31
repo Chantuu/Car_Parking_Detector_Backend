@@ -1,8 +1,16 @@
-import { Body, Controller, Post, Session } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Session,
+  UseGuards,
+} from '@nestjs/common';
 import { RegisterUserDTO } from './DTOs/register-user.dto';
 import { AuthService } from './auth.service';
 import { LoginUserDTO } from './DTOs/login-user.dto';
 import { saveUserToSession } from 'src/helper/functions/save-user-to-session.function';
+import { AuthGuard } from './auth.guard';
 
 @Controller('api/auth')
 export class AuthController {
@@ -14,7 +22,6 @@ export class AuthController {
     @Session() session: Record<string, any>,
   ) {
     const result = await this._authService.register(registerUserDTO);
-
     saveUserToSession(result, session);
 
     return {
@@ -29,12 +36,23 @@ export class AuthController {
     @Session() session: Record<string, any>,
   ) {
     const result = await this._authService.login(loginUserDTO);
-
     saveUserToSession(result, session);
 
     return {
       success: true,
       message: `Successfully signed in user ${result.fullName}`,
+    };
+  }
+
+  @Get('logout')
+  @UseGuards(AuthGuard)
+  logout(@Session() session: Record<string, any>) {
+    const { fullName } = session.user; // Get name of the current user
+    session.user = undefined; // Log out current user
+
+    return {
+      success: true,
+      message: `Successfully logged out user ${fullName}`,
     };
   }
 }
