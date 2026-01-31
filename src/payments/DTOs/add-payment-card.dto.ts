@@ -19,7 +19,7 @@ export class AddPaymentCardDTO {
   cardExpirationYear: number;
 
   @IsNumber()
-  @Min(3)
-  @Max(3)
+  @Min(100)
+  @Max(999)
   ccv: number;
 }
