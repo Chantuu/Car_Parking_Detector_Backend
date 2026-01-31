@@ -6,8 +6,9 @@ import { Repository } from 'typeorm';
 import { User } from 'src/users/user.entity';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import {
-  creditCardAlreadyExistsErrorMessage,
+  paymentCardAlreadyExistsErrorMessage,
   invalidCardCredentialErrorMessage,
+  paymentCardNotExistsErrorMessage,
 } from 'src/helper/messages/messages.variables';
 
 @Injectable()
@@ -17,6 +18,38 @@ export class PaymentsService {
     private _paymentCardRepository: Repository<PaymentCard>,
     private _encryptionService: EncryptionService,
   ) {}
+
+  private maskCardNumber(unmaskedCardNumber) {
+    return `${'*'.repeat(unmaskedCardNumber.length - 4)}${unmaskedCardNumber.slice(-4)}`;
+  }
+
+  async getPaymentCard(user: User) {
+    const paymentCard = await this._paymentCardRepository.findOne({
+      where: { user: { id: user.id } },
+      relations: { user: true },
+    });
+
+    if (paymentCard) {
+      const decryptedCardNumber = this._encryptionService.decrypt(
+        paymentCard.encryptedCardNumber,
+      );
+      const maskedCardNumber = this.maskCardNumber(decryptedCardNumber);
+
+      return {
+        status: 'success',
+        data: {
+          id: paymentCard.id,
+          userId: paymentCard.user.id,
+          cardNumber: maskedCardNumber,
+          cardExpirationMonth: paymentCard.cardExpirationMonth,
+          cardExpirationYear: paymentCard.cardExpirationYear,
+          cardHolderName: paymentCard.cardHolderName,
+        },
+      };
+    } else {
+      throw new BadRequestException(paymentCardNotExistsErrorMessage);
+    }
+  }
 
   async addPaymentCard(addPaymentCardDTO: AddPaymentCardDTO, user: User) {
     if (!user.paymentCard) {
@@ -41,7 +74,7 @@ export class PaymentsService {
 
         await this._paymentCardRepository.save(newPaymentCard);
 
-        const maskedCardNumber = `${'*'.repeat(rawCardNumber.length - 4)}${rawCardNumber.slice(-4)}`;
+        const maskedCardNumber = this.maskCardNumber(rawCardNumber);
         return {
           success: true,
           data: {
@@ -57,7 +90,7 @@ export class PaymentsService {
         throw new BadRequestException(invalidCardCredentialErrorMessage);
       }
     } else {
-      throw new BadRequestException(creditCardAlreadyExistsErrorMessage);
+      throw new BadRequestException(paymentCardAlreadyExistsErrorMessage);
     }
   }
 }
