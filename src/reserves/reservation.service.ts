@@ -27,7 +27,7 @@ export class ReservationService {
 
   async getCurrentActiveReservation(currentUser: User) {
     const activeReservation = await this._reservationRepository.findOne({
-      where: [{ user: currentUser }, { status: ReservationStatus.ACTIVE }],
+      where: [{ user: currentUser, status: ReservationStatus.ACTIVE }],
       relations: { parkingSpot: true },
     });
 
