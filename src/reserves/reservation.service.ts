@@ -1,14 +1,20 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Reservation } from './reservation.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/user.entity';
 import {
   activeReservationAlreadyExitsErrorMessage,
+  activeReservationNotFoundErrorMessage,
   parkingSpotIdErrorMessage,
 } from 'src/helper/messages/messages.variables';
 import { CreateReservationDTO } from './DTOs/create-reservation.dto';
 import { ParkingService } from 'src/parking/parking.service';
+import { ReservationStatus } from 'src/helper/enums/reservation-status.enum';
 
 @Injectable()
 export class ReservationService {
@@ -17,6 +23,28 @@ export class ReservationService {
     private _reservationRepository: Repository<Reservation>,
     private _parkingService: ParkingService,
   ) {}
+
+  async getCurrentActiveReservation(user: User) {
+    const activeReservation = await this._reservationRepository.findOne({
+      where: [{ user: user }, { status: ReservationStatus.ACTIVE }],
+      relations: { parkingSpot: true },
+    });
+
+    if (activeReservation) {
+      return {
+        status: 'success',
+        data: {
+          id: activeReservation.id,
+          userId: user.id,
+          parkingSpotId: activeReservation.parkingSpot.id,
+          startTime: activeReservation.startTime,
+          status: activeReservation.status,
+        },
+      };
+    } else {
+      throw new NotFoundException(activeReservationNotFoundErrorMessage);
+    }
+  }
 
   async createReservation(
     currentUser: User,
