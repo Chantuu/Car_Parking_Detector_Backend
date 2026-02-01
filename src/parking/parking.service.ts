@@ -44,6 +44,7 @@ export class ParkingService {
     const formattedResponseData = (
       await this._parkingSpotRepository.save(spotsToPersist)
     ).map((updatedSpot) => ({
+      id: updatedSpot.id,
       spotName: updatedSpot.spotName,
       status: updatedSpot.status,
       sensorId: updatedSpot.sensorId,
