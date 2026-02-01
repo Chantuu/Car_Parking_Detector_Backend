@@ -8,7 +8,7 @@ import { PaymentCard } from './payments/payment-card.entity';
 import { EncryptionModule } from './encryption/encryption.module';
 import { ParkingModule } from './parking/parking.module';
 import { ParkingSpot } from './parking/parking-spot.entity';
-import { ReservesModule } from './reserves/reservation.module';
+import { ReservationModule } from './reserves/reservation.module';
 import { Reservation } from './reserves/reservation.entity';
 
 @Module({
@@ -24,7 +24,7 @@ import { Reservation } from './reserves/reservation.entity';
     PaymentsModule,
     EncryptionModule,
     ParkingModule,
-    ReservesModule,
+    ReservationModule,
   ],
 })
 export class AppModule {}
