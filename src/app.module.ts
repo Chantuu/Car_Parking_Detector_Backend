@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PaymentsModule } from './payments/payments.module';
 import { PaymentCard } from './payments/payment-card.entity';
 import { EncryptionModule } from './encryption/encryption.module';
+import { ParkingModule } from './parking/parking.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { EncryptionModule } from './encryption/encryption.module';
     AuthModule,
     PaymentsModule,
     EncryptionModule,
+    ParkingModule,
   ],
 })
 export class AppModule {}
