@@ -1,3 +1,4 @@
+import { ReservationStatus } from 'src/helper/enums/reservation-status.enum';
 import { ParkingSpot } from 'src/parking/parking-spot.entity';
 import { User } from 'src/users/user.entity';
 import {
@@ -10,11 +11,14 @@ import {
 
 @Entity()
 /// 1. Lock: One active reservation per User
-@Index('UQ_ACTIVE_USER', ['user'], { unique: true, where: 'isActive = 1' })
-// 2. Lock: One active user per Parking Spot
-@Index('UQ_ACTIVE_SPOT', ['parkingSpot'], {
+@Index('UQ_ONE_ACTIVE_RES_PER_USER', ['user'], {
   unique: true,
-  where: 'isActive = 1',
+  where: "status = 'ACTIVE'",
+})
+// 2. Lock: One active user per Parking Spot
+@Index('UQ_ONE_USER_PER_SPOT', ['parkingSpot'], {
+  unique: true,
+  where: "status = 'ACTIVE'",
 })
 export class Reservation {
   @PrimaryGeneratedColumn('uuid')
@@ -23,8 +27,12 @@ export class Reservation {
   @Column({ type: 'datetime', nullable: false })
   startTime: Date;
 
-  @Column({ type: 'boolean', nullable: false, default: true })
-  isActive: boolean;
+  @Column({
+    type: 'simple-enum',
+    enum: ReservationStatus,
+    default: ReservationStatus.ACTIVE,
+  })
+  status: ReservationStatus;
 
   @ManyToOne(() => User, (user) => user.reservations)
   user: User;
