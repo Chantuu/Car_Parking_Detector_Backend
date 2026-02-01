@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/helper/decorators/current-user.decorator';
 import { User } from 'src/users/user.entity';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDTO } from './DTOs/create-reservation.dto';
+import { EditReservationDTO } from './DTOs/edit-reservation.dto';
 
 @Controller('api/reservation')
 @UseGuards(AuthGuard)
@@ -22,6 +23,17 @@ export class ReservationController {
     return await this._reservationService.createReservation(
       user,
       createReservationDTO,
+    );
+  }
+
+  @Patch()
+  async editActiveReservation(
+    @CurrentUser() user: User,
+    @Body() editReservationDTO: EditReservationDTO,
+  ) {
+    return await this._reservationService.editActiveReservation(
+      user,
+      editReservationDTO,
     );
   }
 }
