@@ -24,3 +24,6 @@ export const insufficientMoneyErrorMessage =
 
 export const parkingSpotsNotRegisteredErrorMessage =
   'No parking spot is currently registered in the application';
+
+export const activeReservationAlreadyExitsErrorMessage =
+  'Reservation is already active for the current user!';
