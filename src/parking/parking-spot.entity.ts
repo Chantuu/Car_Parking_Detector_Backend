@@ -11,7 +11,7 @@ export class ParkingSpot {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'text', nullable: false })
+  @Column({ type: 'text', nullable: false, unique: true })
   spotName: string;
 
   @Column({ type: 'simple-enum', enum: ParkingSpotStatus, nullable: false })
