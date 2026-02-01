@@ -15,6 +15,7 @@ import {
 import { CreateReservationDTO } from './DTOs/create-reservation.dto';
 import { ParkingService } from 'src/parking/parking.service';
 import { ReservationStatus } from 'src/helper/enums/reservation-status.enum';
+import { EditReservationDTO } from './DTOs/edit-reservation.dto';
 
 @Injectable()
 export class ReservationService {
@@ -24,9 +25,9 @@ export class ReservationService {
     private _parkingService: ParkingService,
   ) {}
 
-  async getCurrentActiveReservation(user: User) {
+  async getCurrentActiveReservation(currentUser: User) {
     const activeReservation = await this._reservationRepository.findOne({
-      where: [{ user: user }, { status: ReservationStatus.ACTIVE }],
+      where: [{ user: currentUser }, { status: ReservationStatus.ACTIVE }],
       relations: { parkingSpot: true },
     });
 
@@ -35,7 +36,7 @@ export class ReservationService {
         status: 'success',
         data: {
           id: activeReservation.id,
-          userId: user.id,
+          userId: currentUser.id,
           parkingSpotId: activeReservation.parkingSpot.id,
           startTime: activeReservation.startTime,
           status: activeReservation.status,
@@ -80,6 +81,36 @@ export class ReservationService {
       throw new BadRequestException(parkingSpotIdErrorMessage);
     } else {
       throw new BadRequestException(activeReservationAlreadyExitsErrorMessage);
+    }
+  }
+
+  async editActiveReservation(
+    currentUser: User,
+    editReservationDTO: EditReservationDTO,
+  ) {
+    const currentActiveReservation = await this._reservationRepository.findOne({
+      where: [{ user: currentUser, status: ReservationStatus.ACTIVE }],
+      relations: { parkingSpot: true },
+    });
+
+    console.log(currentActiveReservation);
+
+    if (currentActiveReservation) {
+      currentActiveReservation.status = editReservationDTO.status;
+      await this._reservationRepository.save(currentActiveReservation);
+
+      return {
+        status: 'success',
+        data: {
+          id: currentActiveReservation.id,
+          userId: currentUser.id,
+          parkingSpotId: currentActiveReservation.id,
+          startTime: currentActiveReservation.startTime,
+          status: currentActiveReservation.status,
+        },
+      };
+    } else {
+      throw new NotFoundException(activeReservationNotFoundErrorMessage);
     }
   }
 }
