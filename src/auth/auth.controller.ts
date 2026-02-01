@@ -11,6 +11,8 @@ import { AuthService } from './auth.service';
 import { LoginUserDTO } from './DTOs/login-user.dto';
 import { saveUserToSession } from 'src/helper/functions/save-user-to-session.function';
 import { AuthGuard } from './auth.guard';
+import { CurrentUser } from 'src/helper/decorators/current-user.decorator';
+import { User } from 'src/users/user.entity';
 
 /**
  * This controller is responsible for handling authentication routes.
@@ -58,6 +60,20 @@ export class AuthController {
     return {
       success: true,
       message: `Successfully signed in user ${loggedinUser.fullName}`,
+    };
+  }
+
+  @Get('currentUser')
+  @UseGuards(AuthGuard)
+  async getCurrentUser(@CurrentUser() user: User) {
+    return {
+      status: 'success',
+      currentUser: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        money: user.money,
+      },
     };
   }
 
