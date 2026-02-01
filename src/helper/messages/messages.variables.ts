@@ -21,3 +21,6 @@ export const paymentCardNotExistsErrorMessage =
 
 export const insufficientMoneyErrorMessage =
   'Current user does not have sufficient money to pay reservation!';
+
+export const parkingSpotsNotRegisteredErrorMessage =
+  'No parking spot is currently registered in the application';
