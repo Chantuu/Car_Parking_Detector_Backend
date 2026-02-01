@@ -24,7 +24,7 @@ export class UsersService {
   findOne(userId: string): Promise<User | null> {
     return this._userRepository.findOne({
       where: { id: userId },
-      relations: { paymentCard: true },
+      relations: { paymentCard: true, reservations: true },
     });
   }
 
@@ -37,7 +37,7 @@ export class UsersService {
   findOneByEmail(userEmail: string): Promise<User | null> {
     return this._userRepository.findOne({
       where: { email: userEmail },
-      relations: { paymentCard: true },
+      relations: { paymentCard: true, reservations: true },
     });
   }
 
