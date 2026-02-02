@@ -1,5 +1,5 @@
 import { PaymentCard } from 'src/payments/payment-card.entity';
-import { Reservation } from 'src/reserves/reservation.entity';
+import { Reservation } from 'src/reservation/reservation.entity';
 import {
   Column,
   Entity,
@@ -43,9 +43,15 @@ export class User {
   @Column({ type: 'float', default: 20 })
   money: number;
 
+  /**
+   * Column containing PaymentCard entity, which represents One-To-One relationship.
+   */
   @OneToOne(() => PaymentCard, (card) => card.user)
   paymentCard: PaymentCard;
 
+  /**
+   * Column containing Reservation entities, which represents One-To-Many relationship.
+   */
   @OneToMany(() => Reservation, (reservation) => reservation.user)
   reservations: Reservation[];
 }

@@ -19,17 +19,29 @@ export const paymentCardAlreadyExistsErrorMessage =
 export const paymentCardNotExistsErrorMessage =
   'Payment card for current user does not exist!';
 
-export const insufficientMoneyErrorMessage =
-  'Current user does not have sufficient money to pay reservation!';
-
 export const parkingSpotsNotRegisteredErrorMessage =
   'No parking spot is currently registered in the application';
 
 export const parkingSpotIdErrorMessage =
   'No parking spot was found with that id. Please input correct id!';
 
+export const parkingSpotTakenErrorMessage =
+  'Current parking spot is already taken. Please choose another one!';
+
+export const parkingSpotReservedErrorMessage =
+  'Current parking spot is already reserved. Please choose another one!';
+
 export const activeReservationAlreadyExitsErrorMessage =
   'Reservation is already active for the current user!';
 
 export const activeReservationNotFoundErrorMessage =
   'Current user does not have active reservation';
+
+export const reservationNotFoundErroMessage =
+  'No reservations are found for current user!';
+
+export const notEnoughMoneyErrorMessage =
+  'Current user does not have enough money to complete transaction!';
+
+export const noAmountPresentErrorMessage =
+  'No amount was given in request body, when user checked in the reservation. Please provide amount to deduct from user';

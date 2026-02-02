@@ -21,7 +21,7 @@ export class AuthService {
    *
    * @param registerUserDTO - Validated request body containing user data.
    * @returns Newly registered user entity.
-   * @throws BadRequestException
+   * @throws BadRequestException when another user already has that email
    */
   async register(registerUserDTO: RegisterUserDTO): Promise<User> {
     const userExists = await this._usersService.findOneByEmail(
@@ -40,7 +40,7 @@ export class AuthService {
    *
    * @param loginUserDTO - Validated request body containing user data.
    * @returns Signed in user entity.
-   * @throws BadRequestException
+   * @throws BadRequestException when login credentials are invalid
    */
   async login(loginUserDTO: LoginUserDTO): Promise<User> {
     const userExists = await this._usersService.findOneByEmail(

@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 /**
- * This entity class represents user table in the database.
+ * This entity class represents payment-card table in the database.
  */
 @Entity()
 export class PaymentCard {
@@ -42,6 +42,9 @@ export class PaymentCard {
   @Column({ type: 'text', nullable: false })
   cardHolderName: string;
 
+  /**
+   * Column owner user entity, which represents One-To-One relationship.
+   */
   @OneToOne(() => User, (user) => user.paymentCard, {
     nullable: true,
   })

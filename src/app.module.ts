@@ -8,8 +8,8 @@ import { PaymentCard } from './payments/payment-card.entity';
 import { EncryptionModule } from './encryption/encryption.module';
 import { ParkingModule } from './parking/parking.module';
 import { ParkingSpot } from './parking/parking-spot.entity';
-import { ReservationModule } from './reserves/reservation.module';
-import { Reservation } from './reserves/reservation.entity';
+import { ReservationModule } from './reservation/reservation.module';
+import { Reservation } from './reservation/reservation.entity';
 
 @Module({
   imports: [

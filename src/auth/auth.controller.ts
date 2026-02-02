@@ -13,6 +13,7 @@ import { saveUserToSession } from 'src/helper/functions/save-user-to-session.fun
 import { AuthGuard } from './auth.guard';
 import { CurrentUser } from 'src/helper/decorators/current-user.decorator';
 import { User } from 'src/users/user.entity';
+import { successResponse } from 'src/helper/functions/success-response.function';
 
 /**
  * This controller is responsible for handling authentication routes.
@@ -24,28 +25,29 @@ export class AuthController {
   /**
    * This endpoint is responsible for registering user in the program.
    *
-   * @param registerUserDTO - Request Body Validator.
-   * @param session - Session Object.
+   * @param registerUserDTO - Request body validator.
+   * @param session - Session object.
    * @returns Response object with success and message fields.
    */
   @Post('register')
   async register(
     @Body() registerUserDTO: RegisterUserDTO,
     @Session() session: Record<string, any>,
-  ): Promise<{ success: boolean; message: string }> {
+  ) {
     const registeredUser = await this._authService.register(registerUserDTO);
     saveUserToSession(registeredUser, session);
 
-    return {
-      success: true,
-      message: `Successfully registered user ${registeredUser.fullName}`,
-    };
+    return successResponse(
+      'success',
+      undefined,
+      `Successfully registered user ${registeredUser.fullName}`,
+    );
   }
 
   /**
    * This endpoint is responsible for signing in user in the program.
    *
-   * @param loginUserDTO - Request Body Validator
+   * @param loginUserDTO - Request body validator.
    * @param session - Session object.
    * @returns Response object with success and message fields.
    */
@@ -53,35 +55,40 @@ export class AuthController {
   async login(
     @Body() loginUserDTO: LoginUserDTO,
     @Session() session: Record<string, any>,
-  ): Promise<{ success: boolean; message: string }> {
+  ) {
     const loggedinUser = await this._authService.login(loginUserDTO);
     saveUserToSession(loggedinUser, session);
 
-    return {
-      success: true,
-      message: `Successfully signed in user ${loggedinUser.fullName}`,
-    };
+    return successResponse(
+      'success',
+      undefined,
+      `Successfully signed in user ${loggedinUser.fullName}`,
+    );
   }
 
+  /**
+   * This endpoint is used to return currently signed in user data.
+   * It is protected by AuthGuard.
+   *
+   * @param currentUser - - Current user obtained by Param decorator.
+   * @returns Promise with response object containing current user data
+   */
   @Get('currentUser')
   @UseGuards(AuthGuard)
-  async getCurrentUser(@CurrentUser() user: User) {
-    return {
-      status: 'success',
-      currentUser: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        money: user.money,
-      },
-    };
+  async getCurrentUser(@CurrentUser() currentUser: User) {
+    return successResponse('success', {
+      id: currentUser.id,
+      email: currentUser.email,
+      fullName: currentUser.fullName,
+      money: currentUser.money,
+    });
   }
 
   /**
    * This endpoint is responsible for signing out user from the application.
    * It must be protected by Auth guard.
    *
-   * @param session - Session Object.
+   * @param session - Session object.
    * @returns Response object with success and message fields.
    */
   @Get('logout')
@@ -90,9 +97,10 @@ export class AuthController {
     const { fullName } = session.user; // Get name of the current user
     session.user = undefined; // Log out current user
 
-    return {
-      success: true,
-      message: `Successfully logged out user ${fullName}`,
-    };
+    return successResponse(
+      'success',
+      undefined,
+      `Successfully logged out user ${fullName}`,
+    );
   }
 }
