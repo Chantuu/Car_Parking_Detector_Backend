@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +11,7 @@ import { User } from 'src/users/user.entity';
 import {
   activeReservationAlreadyExitsErrorMessage,
   activeReservationNotFoundErrorMessage,
+  envVariableNotDefinedErrorMessage,
   parkingSpotIdErrorMessage,
   parkingSpotReservedErrorMessage,
   parkingSpotTakenErrorMessage,
@@ -20,6 +22,7 @@ import { ParkingService } from 'src/parking/parking.service';
 import { ReservationStatus } from 'src/helper/enums/reservation-status.enum';
 import { EditReservationDTO } from './DTOs/edit-reservation.dto';
 import { ParkingSpotStatus } from 'src/helper/enums/parking-spot-status.enum';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * This service is used to control reservation related logic.
@@ -30,6 +33,7 @@ export class ReservationService {
     @InjectRepository(Reservation)
     private _reservationRepository: Repository<Reservation>,
     private _parkingService: ParkingService,
+    private _configService: ConfigService,
   ) {}
 
   /**
@@ -65,6 +69,59 @@ export class ReservationService {
 
     if (activeReservation) {
       return this.formatReservationData(activeReservation, currentUser);
+    } else {
+      throw new NotFoundException(activeReservationNotFoundErrorMessage);
+    }
+  }
+
+  /**
+   * This method calculates payment price for the current users' active reservation based
+   * on the elapsed time.
+   *
+   * @param currentUser - User currently signed in.
+   * @returns Promise containing properly formatted payment data
+   * @throws NotFoundException if active reservation is not found for current user
+   */
+  async calculateReservationPrice(currentUser: User) {
+    const activeReservation = await this._reservationRepository.findOne({
+      where: [{ user: currentUser, status: ReservationStatus.ACTIVE }],
+      relations: { parkingSpot: true },
+    });
+
+    // If current user has active reservation
+    if (activeReservation) {
+      const ratePerMinute = this._configService.get<number>(
+        'ACTIVE_RESERVATION_RATE_PER_MINUTE',
+      );
+      const currentDate = new Date();
+
+      // If ACTIVE_RESERVATION_RATE_PER_MINUTE env variable is not defined
+      if (!ratePerMinute) {
+        console.error(
+          'Env variable ACTIVE_RESERVATION_RATE_PER_MINUTE is not defined!',
+        );
+        throw new InternalServerErrorException(
+          envVariableNotDefinedErrorMessage,
+        );
+      }
+
+      // Calculate elapsed time in milleseconds
+      const diffMilleseconds =
+        currentDate.getTime() - activeReservation.startTime.getTime();
+
+      const secondsElapsed = Math.max(0, Math.floor(diffMilleseconds / 1000));
+      const minutesElapsed = secondsElapsed / 60;
+
+      const amountToPay = minutesElapsed * ratePerMinute;
+      // Format to 2 decimal places
+      const finalPrice = parseFloat(amountToPay.toFixed(2)) + 1;
+
+      return {
+        startTime: activeReservation.startTime.toISOString(),
+        endTime: currentDate.toISOString(),
+        amountToPay: finalPrice,
+        currency: 'GEL',
+      };
     } else {
       throw new NotFoundException(activeReservationNotFoundErrorMessage);
     }
