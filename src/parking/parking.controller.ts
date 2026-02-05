@@ -17,7 +17,6 @@ import { successResponse } from 'src/helper/functions/success-response.function'
  * Whole controller is protected AuthGuard.
  */
 @Controller('api/parking')
-@UseGuards(AuthGuard)
 export class ParkingController {
   constructor(private _parkingService: ParkingService) {}
 
