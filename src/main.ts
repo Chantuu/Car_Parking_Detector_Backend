@@ -27,6 +27,10 @@ async function bootstrap() {
       whitelist: true, // Removes any properties not specified in DTOs
     }),
   );
+
+  // Enable Cross-Origin Resource Sharin
+  app.enableCors();
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
