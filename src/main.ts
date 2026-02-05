@@ -29,7 +29,10 @@ async function bootstrap() {
   );
 
   // Enable Cross-Origin Resource Sharin
-  app.enableCors();
+  app.enableCors({
+    origin: '*',
+    credentials: true,
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }
