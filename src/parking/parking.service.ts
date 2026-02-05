@@ -60,14 +60,30 @@ export class ParkingService {
 
       // If this parking spot entity exists
       if (persistedSpot) {
-        // Lock RESERVED status for sensor and reserve functionality integration
-        const isLocked = persistedSpot.status === ParkingSpotStatus.RESERVED;
+        // Lock RESERVED status - sensor data is ignored
+        const isReserved = persistedSpot.status === ParkingSpotStatus.RESERVED;
 
-        // Return changed parking spot data. If isLocked variable is true, sstatus property stays same
+        // If status is RESERVED_CHECK, accept the sensor data
+        const isCheckingReservation =
+          persistedSpot.status === ParkingSpotStatus.RESERVED_CHECK;
+
+        // Determine final status
+        let finalStatus;
+        if (isCheckingReservation) {
+          // Accept sensor data (FREE/TAKEN)
+          finalStatus = incomingSpotDTO.status;
+        } else if (isCheckingReservation) {
+          // Keep RESERVED - ignore sensor
+          finalStatus = ParkingSpotStatus.RESERVED;
+        } else {
+          // Normal operation - use sensor data
+          finalStatus = incomingSpotDTO.status;
+        }
+
         return {
           ...persistedSpot,
           ...incomingSpotDTO,
-          status: isLocked ? persistedSpot.status : incomingSpotDTO.status,
+          status: finalStatus,
         };
       }
 
@@ -75,9 +91,9 @@ export class ParkingService {
       return incomingSpotDTO;
     });
 
-    const formattedResponseData = (
-      await this._parkingSpotRepository.save(spotsToPersist)
-    ).map((updatedSpot) => ({
+    const savedSpots = await this._parkingSpotRepository.save(spotsToPersist);
+
+    const formattedResponseData = savedSpots.map((updatedSpot) => ({
       id: updatedSpot.id,
       spotName: updatedSpot.spotName,
       status: updatedSpot.status,
